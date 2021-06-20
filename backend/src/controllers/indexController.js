@@ -1,5 +1,6 @@
 const baseUrl = require('../services/api');
 const axios = require('axios').default;
+const rndInt = require('../helpers/randomNumber');
 
 
 exports.Song = (req, res) => {
@@ -22,9 +23,4 @@ const getSongData = async () => {
     return "Falha";
   }
   return songData.data;
-};
-
-function rndInt() {
-  let result = Math.floor(Math.random() * 300000) + 1;
-  return result;
 };

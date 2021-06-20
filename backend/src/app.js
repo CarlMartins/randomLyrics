@@ -8,6 +8,11 @@ app.use(express.urlencoded({ extended: false }));
 var indexRouter = require('./routes/index');
 app.use('/', indexRouter);
 
+app.use((req, res) => {
+  res.status(404);
+  res.send('Invalid');
+});
+
 app.listen(3000, () => {
   console.log('Running at http://localhost:3000');
 });
