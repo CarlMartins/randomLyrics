@@ -1,5 +1,5 @@
-function rndInt() {
-  let result = Math.floor(Math.random() * 300000) + 1;
+function rndInt(maxValue) {
+  let result = Math.floor(Math.random() * maxValue) + 1;
   return result;
 };
 
