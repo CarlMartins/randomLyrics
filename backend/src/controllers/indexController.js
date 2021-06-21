@@ -4,21 +4,26 @@ const rndInt = require('../helpers/randomNumber');
 
 
 exports.Song = (req, res) => {
+  let finalData = {};
+
   getArtistData()
     .then((artistData) => {
-      getRandomSong(artistData)
-        .then((randomSong) => {
-          getFinalSong(randomSong)
-            .then((finalSong) => {
-              res.send(finalSong);
-            });
-        });
+      return getRandomSongId(artistData);
+    })
+    .then((songData) => {
+      finalData.song_data = songData;
+      return getFinalSong(songData.song_id);
+    })
+    .then((finalSong) => {
+      finalData.song_data.lyrics = finalSong.lyrics;
+      res.send(finalData);
     })
     .catch((err) => res.send(err));
 };
 
 const getArtistData = async () => {
   let artistId = 0;
+  let availableSongs = 0;
 
   try {
     do {
@@ -33,24 +38,33 @@ const getArtistData = async () => {
   let artistData = tempData.data.message.body.track_list;
 
   return {
-    artistData: artistData,
-    availableSongs: availableSongs
+    artist_data: artistData,
+    available_songs: availableSongs
   };
 };
 
-const getRandomSong = async (artistData) => {
+const getRandomSongId = async (artistData) => {
   let songIds = [];
-  for (let i = 0; i < artistData.availableSongs; i++) {
-    songIds.push(artistData.artistData[i].track.track_id);
+  for (let i = 0; i < artistData.available_songs; i++) {
+    songIds.push([artistData.artist_data[i].track.track_id, artistData.artist_data[i].track.track_name]);
   }
 
-  let finalSong = 0;
-  finalSong = songIds[rndInt(songIds.length) - 1];
-  return finalSong;
+  let finalSong = songIds[rndInt(songIds.length) - 1];
+  let artist_name = artistData.artist_data[0].track.artist_name;
+
+  return {
+    song_id: finalSong[0],
+    song_name: finalSong[1],
+    artist_name: artist_name
+  };
 };
 
 const getFinalSong = async (songId) => {
-  let finalSong = await axios.get(`${baseUrl.baseUrl}/matcher.lyrics.get?track_id=${songId}&apikey=${baseUrl.apikey}`);
 
-  return finalSong.data.message.body.lyrics.lyrics_body;
+  let finalSong = await axios.get(`${baseUrl.baseUrl}/matcher.lyrics.get?track_id=${songId}&apikey=${baseUrl.apikey}`);
+  let lyrics = finalSong.data.message.body.lyrics.lyrics_body;
+
+  return {
+    lyrics: lyrics
+  };
 };
